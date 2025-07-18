@@ -11,7 +11,8 @@ It is structured as a production-ready project with modular scripts and DAGs.
 
 ## Project Structure
 
-```imdb-etl/
+```
+imdb-etl/
 ├── dags/
 │ ├── imdb_pipeline.py # Airflow DAG definition
 │ └── scripts/
@@ -24,7 +25,8 @@ It is structured as a production-ready project with modular scripts and DAGs.
 ├── docker-compose.yaml # Airflow + Postgres orchestration
 ├── .env # Environment variables (not committed)
 ├── requirements.txt # Python dependencies
-└── README.md```
+└── README.md
+```
 
 
 ---
@@ -66,27 +68,27 @@ IMDb public datasets (updated daily), including:
 ## Setup Instructions
 
 ### 1. Clone the repository
-```bash
+```
+bash
 git clone https://github.com/yourusername/imdb-etl.git
 cd imdb-etl
+```
 
 2. Configure environment
 
-Create a .env file based on .env.example and fill in your PostgreSQL credentials:
+Create a .env file based on .env.example and fill in your PostgreSQL credentials.
 
-POSTGRES_USER=airflow
-POSTGRES_PASSWORD=airflow
-POSTGRES_DB=airflow
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
+This is used by both Airflow and your load.py script.
 
-    This is used by both Airflow and your load.py script.
+Create a docker-compose.yaml file based on docker-compose.yaml.example and fill in you credentials under 'airflow-init'.
 
 3. Run via Docker
 
 Make sure Docker is installed and run:
 
+```
 docker-compose up --build
+```
 
 This will start:
 
@@ -94,11 +96,7 @@ This will start:
 
     PostgreSQL database service
 
-Login to Airflow:
-
-    Username: syd-admin
-
-    Password: admin
+Login to Airflow using the credentials in the .yaml file.
 
 4. Trigger the DAG
 
