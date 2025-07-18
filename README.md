@@ -11,7 +11,7 @@ It is structured as a production-ready project with modular scripts and DAGs.
 
 ## Project Structure
 
-imdb-etl/
+```imdb-etl/
 ├── dags/
 │ ├── imdb_pipeline.py # Airflow DAG definition
 │ └── scripts/
@@ -24,7 +24,7 @@ imdb-etl/
 ├── docker-compose.yaml # Airflow + Postgres orchestration
 ├── .env # Environment variables (not committed)
 ├── requirements.txt # Python dependencies
-└── README.md
+└── README.md```
 
 
 ---

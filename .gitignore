@@ -22,11 +22,11 @@ dags/__pycache__/
 postgres-db-volume/
 
 # Data files
-data/raw/
-data/processed/
-data/*.csv
-data/*.tsv
-data/*.gz
+data/processed/*.csv
+data/raw/*.tsv
+data/raw/*.gz
+!data/raw/.gitkeep
+!data/processed/.gitkeep
 
 # Jupyter
 .ipynb_checkpoints/
