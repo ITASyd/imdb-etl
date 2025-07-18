@@ -110,6 +110,7 @@ Once the DAG imdb_pipeline appears in the UI:
 
 Example Output
 
+```
 films_for_genre.csv
 genre	film_count
 Drama	18921
@@ -120,12 +121,14 @@ best_films_per_genre.csv
 genre	title	startYear	rating	votes
 Drama	The Shawshank...	1994	9.3	2500000
 Comedy	Life Is Beautiful	1997	8.6	800000
+```
 
 Dependencies
 
 Install them with:
-
+```
 pip install -r requirements.txt
+```
 
 Main libraries:
 
