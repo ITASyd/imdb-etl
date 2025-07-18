@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg
+*.egg-info/
+*.log
+
+# Env files
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Airflow
+airflow.cfg
+logs/
+dags/__pycache__/
+
+# Docker volumes
+postgres-db-volume/
+
+# Data files
+data/raw/
+data/processed/
+data/*.csv
+data/*.tsv
+data/*.gz
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VSCode & IDEs
+.vscode/
+.idea/
