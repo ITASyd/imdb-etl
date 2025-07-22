@@ -1,5 +1,14 @@
 import pandas as pd
 from pathlib import Path
+from dags.config import (RAW,
+                         PROCESSED,
+                         BASICS_TSV,
+                         RATINGS_TSV,
+                         MIN_VOTES,
+                         SEPARATOR,
+                         MISSING_VALUE,
+                         GENRE_CSV,
+                         BEST_CSV)
 
 def transform ():
     """
@@ -11,13 +20,12 @@ def transform ():
        • top-rated films per genre (votes ≥ 10k)
     Saves CSV files in data/processed/.
     """
-    raw = Path("/opt/airflow/data/raw") #DOCKER
-    proc = Path("/opt/airflow/data/processed") #DOCKER
-    proc.mkdir(parents=True, exist_ok=True)
+
+    PROCESSED.mkdir(parents=True, exist_ok=True)
 
     # File reading
-    basics = pd.read_csv(raw / "title.basics.tsv", sep="\t", na_values="\\N")
-    ratings = pd.read_csv(raw / "title.ratings.tsv", sep="\t", na_values="\\N")
+    basics = pd.read_csv(BASICS_TSV, sep=SEPARATOR, na_values=MISSING_VALUE)
+    ratings = pd.read_csv(RATINGS_TSV, sep=SEPARATOR, na_values=MISSING_VALUE)
 
     # Filtering
     movies = basics[basics["titleType"]=="movie"].copy()
@@ -33,10 +41,10 @@ def transform ():
     genre_counts = exploded.groupby("genres")["tconst"].count().reset_index()
     genre_counts.columns = ["genre", "film_count"]
     genre_counts.sort_values(by="film_count", ascending=False)
-    genre_counts.to_csv(proc / "films_for_genre.csv", index=False)
+    genre_counts.to_csv(GENRE_CSV, index=False)
 
     # Best movie by genre
-    top = (exploded[exploded["numVotes"] >= 10000]
+    top = (exploded[exploded["numVotes"] >= MIN_VOTES]
             .sort_values(["genres", "averageRating", "numVotes"], ascending=[True, False, False])
             .groupby("genres")
             .first()
@@ -45,4 +53,4 @@ def transform ():
 
     top = top[["genres", "primaryTitle", "startYear", "averageRating", "numVotes"]]
     top.columns = ["genre", "title", "startYear", "rating", "votes"]
-    top.to_csv(proc / "best_films_per_genre.csv", index=False)
+    top.to_csv(BEST_CSV, index=False)

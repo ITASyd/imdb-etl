@@ -1,9 +1,9 @@
 # Core dependencies
-pandas==2.2.2
+pandas==2.0.3
 requests==2.31.0
 urllib3==2.2.1
 python-dotenv==1.0.1
 
 # SQLAlchemy for DB connection
-sqlalchemy==2.0.30
+sqlalchemy>=1.4,<2.0
 psycopg2-binary==2.9.9
