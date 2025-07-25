@@ -21,9 +21,11 @@ def test_load(mock_read_sql, mock_read_csv, mock_create_engine):
 
     mock_read_sql.side_effect = [mock.Mock(), mock.Mock()]
 
-    # Patch to_sql on each DataFrame
+    # Patch to_sql on each DataFrame e ignora la validazione Pandera
     with mock.patch.object(mock_genre_df, 'to_sql') as mock_to_sql_genre, \
-         mock.patch.object(mock_best_df, 'to_sql') as mock_to_sql_best:
+         mock.patch.object(mock_best_df, 'to_sql') as mock_to_sql_best, \
+         mock.patch("dags.scripts.load.BestSchema.validate", return_value=None), \
+         mock.patch("dags.scripts.load.GenreSchema.validate", return_value=None):
         from dags.scripts import load
         load.load()
 

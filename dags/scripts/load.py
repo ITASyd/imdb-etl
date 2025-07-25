@@ -1,7 +1,27 @@
 from sqlalchemy import create_engine
 import pandas as pd
+import pandera as pa
+from pandera.typing import Series
+from pandera.errors import SchemaError
 from airflow.utils.log.logging_mixin import LoggingMixin
 from dags.config import BEST_CSV, GENRE_CSV, DB_CONNECTION_STRING
+
+class GenreSchema(pa.DataFrameModel):
+    genre: str
+    film_count: int
+
+    class Config:
+        strict = True
+
+class BestSchema(pa.DataFrameModel):
+    genre: str
+    title: str
+    startYear: float
+    rating: float
+    votes: float
+
+    class Config:
+        strict = True
 
 def load():
     """
@@ -14,6 +34,15 @@ def load():
 
         genre = pd.read_csv(GENRE_CSV)
         best = pd.read_csv(BEST_CSV)
+
+        # Pandera validation
+        try:
+            BestSchema.validate(best)
+            GenreSchema.validate(genre)
+        except SchemaError as err:
+            log.error("Error during Pandera validation:")
+            log.error(err.failure_cases)
+            return
 
         genre.to_sql("films_for_genre", con=engine, if_exists="replace", index=False)
         best.to_sql("best_films_per_genre", con=engine, if_exists="replace", index=False)
