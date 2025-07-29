@@ -41,3 +41,50 @@ MISSING_VALUE = "\\N"
 # _______ TRANSFORM AND LOAD VARIABLES _______ #
 GENRE_CSV = PROCESSED / "films_for_genre.csv"
 BEST_CSV = PROCESSED / "best_films_per_genre.csv"
+
+
+# _______ DOC MD ________ #
+
+DAG_MD = """
+        # IMDB DAG
+
+        This DAG extracts the dataset from the IMDB website and performs some example operations.
+
+        - Data extractions
+        - Decompression and conversion in csv
+        - Basic transformation
+        - Loading data into SQL database
+        """
+
+EXT_MD = """
+        # Extraction
+
+        This task downloads the dataset from IMDB website and decompresses it.
+        """
+
+TRA_MD = """
+        # Transformation
+
+        This task uses Pandas to create DataFrames from the TSV files, then:
+        1. Filters only 'movie' titles
+        2. Joins ratings
+        3. Computes:
+        * film count per genre
+        * top-rated films per genre (votes ≥ 10k)
+        * saves CSV files in data/processed/.
+        """
+
+LOA_MD = """
+        # Loading
+        
+        This task loads the transformed data inside a PostgreSQL database.
+        """
+
+ANA_MD = """
+        # Analysis
+
+        This task analyzes film genre data from a database, logging top genres by average rating and the most voted film per genre.
+        This function connects to a database, retrieves film data, and performs two main analyses:
+        1. Finds and logs the top 3 genres with the highest average ratings (considering only genres with at least 100 movies) using an SQL query.
+        2. Identifies and logs the most voted film for each genre using Pandas operations.
+        """

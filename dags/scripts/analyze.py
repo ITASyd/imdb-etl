@@ -6,6 +6,13 @@ from sqlalchemy import create_engine
 from dags.config import DB_CONNECTION_STRING
 
 def analyze():
+    """
+    Analyzes film genre data from a database, logging top genres by average rating and the most voted film per genre.
+    This function connects to a database, retrieves film data, and performs two main analyses:
+    1. Finds and logs the top 3 genres with the highest average ratings (considering only genres with at least 100 movies) using an SQL query.
+    2. Identifies and logs the most voted film for each genre using Pandas operations.
+    """
+
     log = LoggingMixin().log
     
     try:
