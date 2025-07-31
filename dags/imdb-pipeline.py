@@ -6,6 +6,9 @@ from scripts.extract import extract
 from scripts.transform import transform
 from scripts.load import load
 from scripts.analyze import analyze
+from scripts.visualize.transform_visual import transform_visualize
+from scripts.visualize.extract_visual import extract_visualize
+from scripts.visualize.analyze_visual import analyze_visualize
 from datetime import timedelta
 from config import (DAG_MD,
                     EXT_MD,
@@ -43,5 +46,17 @@ with DAG (
                         retry_delay=timedelta(minutes=5),
                         execution_timeout=timedelta(minutes=30),
                         doc_md=ANA_MD)
+    
+    v1 = PythonOperator(task_id="extract_visualize",
+                        python_callable=extract_visualize)
+    
+    v2 = PythonOperator(task_id="transform_visualize",
+                        python_callable=transform_visualize)
+    
+    v3 = PythonOperator(task_id="analyze_visualize",
+                        python_callable=analyze_visualize)
 
-    t1 >> t2 >> t3 >> t4
+    t1 >> [t2, v1]
+    t2 >> [t3, v2]
+    t3 >> t4
+    t4 >> v3

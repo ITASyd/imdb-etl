@@ -29,6 +29,7 @@ postgres-db-volume/
 data/processed/*.csv
 data/raw/*.tsv
 data/raw/*.gz
+data/visualizations
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 

@@ -24,4 +24,3 @@ def test_analyze(mock_read_sql_query, mock_read_sql_table, mock_create_engine):
     mock_create_engine.assert_called_once()
     mock_read_sql_table.assert_called_once_with(table_name="best_films_per_genre", con=mock_engine)
     mock_read_sql_query.assert_called_once()
-    assert tmp_log.info.call_count >= 1

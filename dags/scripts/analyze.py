@@ -37,8 +37,10 @@ def analyze():
         top_movies_per_genre = genre_sorted.drop_duplicates(subset="genre", keep="first")
         top_movies_per_genre = top_movies_per_genre[["genre", "title", "votes"]]
         top_movies_per_genre = top_movies_per_genre.sort_values(by="votes", ascending=False)
-        log.info("Most voted film per genre (top 5):\n%s", top_movies_per_genre.head())
+        top5 = top_movies_per_genre.head()
+        log.info("Most voted film per genre (top 5):\n%s", top5)
 
+        return(top5.to_json(orient="records"))
 
     except Exception as e:
         log.error(f"Error during analysis: {e}")
