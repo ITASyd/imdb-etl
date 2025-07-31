@@ -2,7 +2,10 @@ import urllib.request
 import gzip
 import shutil
 import os
-from dags.config import RAW, FILES
+import time
+import pandas as pd
+from datetime import datetime
+from dags.config import RAW, FILES, SEPARATOR, MISSING_VALUE
 from airflow.utils.log.logging_mixin import LoggingMixin
 from urllib.error import URLError
 
@@ -10,6 +13,9 @@ def extract():
     """
     Downloads IMDb datasets, decompresses them, and saves them into data/raw/.
     """
+    start = time.time()
+    start_date = datetime.now()
+    start_date = start_date.strftime("%Y-%m-%d")
     log = LoggingMixin().log
 
     RAW.mkdir(parents=True, exist_ok=True)
@@ -36,5 +42,20 @@ def extract():
         except (OSError, gzip.BadGzipFile) as e:
             log.error(f"Error during {zipped_path} extraction: {e}")
             continue
-        
-            
+    
+    # Data for metrics
+    duration = time.time() - start
+    duration = f"{duration:.2f}"
+    row_count = 0
+    files_size = 0
+    for file in RAW.glob("*.tsv"):
+        df = pd.read_csv(file, sep=SEPARATOR, na_values=MISSING_VALUE)
+        row_count += len(df)
+        files_size += os.path.getsize(file)
+    log.info(f"duration: {duration}, row count: {row_count}, file size: {files_size}")
+    return {
+        "duration": duration,
+        "start_date": start_date,
+        "row_count": row_count,
+        "files_size": files_size
+    }

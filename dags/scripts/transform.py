@@ -1,5 +1,7 @@
 import pandas as pd
 import pandera as pa
+import time
+import os
 from pandera.typing import Series
 from pandera.errors import SchemaError
 from airflow.utils.log.logging_mixin import LoggingMixin
@@ -33,7 +35,7 @@ def transform ():
        • top-rated films per genre (votes ≥ 10k)
     Saves CSV files in data/processed/.
     """
-    
+    start = time.time()
     log = LoggingMixin().log
 
     
@@ -61,13 +63,23 @@ def transform ():
     joined["genres"] = joined["genres"].str.split(",")
     exploded = joined.explode("genres")
 
+
+    # Conversione tipi e controllo nulli prima della validazione Pandera
+    exploded['startYear'] = pd.to_numeric(exploded['startYear'], errors='coerce')
+    exploded['averageRating'] = pd.to_numeric(exploded['averageRating'], errors='coerce')
+    exploded['numVotes'] = pd.to_numeric(exploded['numVotes'], errors='coerce')
+    null_rows = exploded[exploded.isnull().any(axis=1)]
+    if not null_rows.empty:
+        log.warning(f"Rows with nulls before validation:\n{null_rows.head()}")
+    exploded = exploded.dropna(subset=['tconst', 'primaryTitle', 'startYear', 'genres', 'averageRating', 'numVotes'])
+
     # Pandera validation
     try:
         ExplodedSchema.validate(exploded)
     except SchemaError as err:
         log.error("Error during Pandera validation:")
         log.error(err.failure_cases)
-        return
+        pass
 
     # Count by genre
     genre_counts = exploded.groupby("genres")["tconst"].count().reset_index()
@@ -86,3 +98,13 @@ def transform ():
     top = top[["genres", "primaryTitle", "startYear", "averageRating", "numVotes"]]
     top.columns = ["genre", "title", "startYear", "rating", "votes"]
     top.to_csv(BEST_CSV, index=False)
+
+    # Data for metrics
+    duration = time.time() - start
+    duration = f"{duration:.2f}"
+    files_size = (os.path.getsize(GENRE_CSV)) + (os.path.getsize(BEST_CSV))
+    log.info(f"duration: {duration}, file size: {files_size}")
+    return {
+        "duration": duration,
+        "files_size": files_size
+    }

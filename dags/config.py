@@ -13,6 +13,7 @@ BASE_PATH = Path("/opt/airflow/data") if IS_DOCKER else Path("data")
 RAW = BASE_PATH / "raw"
 PROCESSED = BASE_PATH / "processed"
 VISUALIZATIONS = BASE_PATH / "visualizations"
+METRICS = BASE_PATH / "metrics"
 
 # DB Connection variables
 DB_USER = os.getenv("POSTGRES_USER")

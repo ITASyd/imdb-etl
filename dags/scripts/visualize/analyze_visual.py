@@ -15,7 +15,7 @@ def analyze_visualize(**context):
 
     try:
         data = context["ti"].xcom_pull(task_ids="analyze")
-        best_json = data
+        best_json = data["result"]
         best = pd.read_json(best_json)
         best_title_votes = best[["title", "votes"]]
 

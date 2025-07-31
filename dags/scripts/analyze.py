@@ -1,4 +1,5 @@
 import pandas as pd
+import time
 from pandera.typing import Series
 from pandera.errors import SchemaError
 from airflow.utils.log.logging_mixin import LoggingMixin
@@ -12,7 +13,7 @@ def analyze():
     1. Finds and logs the top 3 genres with the highest average ratings (considering only genres with at least 100 movies) using an SQL query.
     2. Identifies and logs the most voted film for each genre using Pandas operations.
     """
-
+    start = time.time()
     log = LoggingMixin().log
     
     try:
@@ -40,7 +41,13 @@ def analyze():
         top5 = top_movies_per_genre.head()
         log.info("Most voted film per genre (top 5):\n%s", top5)
 
-        return(top5.to_json(orient="records"))
+        duration = time.time() - start
+        duration = f"{duration:.2f}"
+        log.info(f"Duration: {duration}")
+        return {
+            "result": top5.to_json(orient="records"),
+            "duration": duration
+        }
 
     except Exception as e:
         log.error(f"Error during analysis: {e}")

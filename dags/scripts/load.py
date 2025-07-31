@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 import pandas as pd
 import pandera as pa
+import time
 from pandera.typing import Series
 from pandera.errors import SchemaError
 from airflow.utils.log.logging_mixin import LoggingMixin
@@ -27,7 +28,7 @@ def load():
     """
     Load the transformed data inside a PostgreSQL database.
     """
-    
+    start = time.time()
     log = LoggingMixin().log
     try:
         engine = create_engine(DB_CONNECTION_STRING)
@@ -53,6 +54,10 @@ def load():
         log.info(read_best)
         log.info(read_genre)
         log.info("Data loaded successfully.")
+        duration = time.time() - start
+        duration = f"{duration:.2f}"
+        log.info(f"Duration: {duration}")
+        return {"duration": duration}
     
     except Exception as e:
         log.error(f"Error during loading: {e}")
