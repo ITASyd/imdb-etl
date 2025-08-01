@@ -24,7 +24,8 @@ RATINGS_DF = pd.DataFrame({
 
 @mock.patch("dags.scripts.transform.pd.read_csv")
 @mock.patch("dags.scripts.transform.PROCESSED")
-def test_transform(mock_processed, mock_read_csv):
+@mock.patch("dags.scripts.transform.os.path.getsize")
+def test_transform(mock_getsize, mock_processed, mock_read_csv):
     import dags.scripts.transform as tr
     tr.GENRE_CSV = "genre_test.csv"
     tr.BEST_CSV = "best_test.csv"
@@ -33,6 +34,7 @@ def test_transform(mock_processed, mock_read_csv):
     # Mock setup
     mock_read_csv.side_effect = [BASICS_DF, RATINGS_DF]
     mock_processed.mkdir.return_value = None
+    mock_getsize.return_value = 0
 
     # to_csv mock
     with mock.patch("pandas.DataFrame.to_csv") as mock_to_csv:
