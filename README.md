@@ -14,17 +14,29 @@ It is structured as a production-ready project with modular scripts and DAGs.
 ```
 imdb-etl/
 ├── dags/
-│ ├── imdb_pipeline.py # Airflow DAG definition
-│ └── scripts/
-│ ├── extract.py # Extract task (download + decompress)
-│ ├── transform.py # Transform task (cleaning + aggregations)
-│ └── load.py # Load task (PostgreSQL insert)
+│   ├── imdb_pipeline.py         # Airflow DAG definition
+│   ├── scripts/
+│   │   ├── extract.py          # Extract task (download + decompress)
+│   │   ├── transform.py        # Transform task (cleaning + aggregations)
+│   │   ├── load.py             # Load task (PostgreSQL insert)
+│   │   ├── metrics.py          # Generate metrics for the DAG (collect via xcom)
+│   │   └── visualize/          # Create charts with metrics (matplotlib)
+│   │       ├── extract_visual.py
+│   │       ├── transform_visual.py
+│   │       ├── load_visual.py
+│   │       └── metrics_visual.py
+│   └── tests/
+│       ├── test_extract.py     # Unit tests for extract
+│       ├── test_transform.py   # Unit tests for transform
+│       ├── test_load.py        # Unit tests for load
+│       └── test_analyze_visual.py # Unit tests for visualization
 ├── data/
-│ ├── raw/ # Raw IMDb data (.tsv)
-│ └── processed/ # Processed output (.csv)
-├── docker-compose.yaml # Airflow + Postgres orchestration
-├── .env # Environment variables (not committed)
-├── requirements.txt # Python dependencies
+│   ├── raw/                    # Raw IMDb data (.tsv)
+│   ├── processed/              # Processed output (.csv)
+│   └── visualizations/         # Generated charts (.png)
+├── docker-compose.yaml         # Airflow + Postgres orchestration
+├── .env                        # Environment variables (not committed)
+├── requirements.txt            # Python dependencies
 └── README.md
 ```
 
@@ -50,15 +62,18 @@ IMDb public datasets (updated daily), including:
 ### 2. Transform
 - Filters titles of type `movie`
 - Joins `ratings` on `tconst`
+- Cleans and validates data (Pandera)
 - Computes:
   - Movie count per genre
   - Best-rated movies per genre (with ≥ 10,000 votes)
 - Saves two processed CSV files:
   - `/data/processed/films_for_genre.csv`
   - `/data/processed/best_films_per_genre.csv`
+- Returns metrics (duration, file size) via XCom for downstream tasks
 
 ### 3. Load
 - Loads processed data into PostgreSQL via SQLAlchemy
+- Receives file paths via XCom from the transform task
 - Creates or replaces the following tables:
   - `films_for_genre`
   - `best_films_per_genre`
@@ -108,6 +123,20 @@ Once the DAG imdb_pipeline appears in the UI:
 
     Monitor task progress in the graph view
 
+best_films_per_genre.csv
+---
+
+## DAG Data Flow & Metrics
+
+- Data between tasks is passed using Airflow XCom (not via intermediate files)
+- The transform task returns a dict with:
+  - `duration`: seconds taken for transformation
+  - `files_size`: total size of processed CSV files
+- The load task reads processed file paths from XCom and loads them into PostgreSQL
+- Analyze and visualize tasks use XCom to pass results and metrics for reporting
+
+---
+
 Example Output
 
 ```
@@ -137,8 +166,35 @@ Main libraries:
     sqlalchemy, psycopg2-binary
 
     python-dotenv
-
+    matplotlib
+    pytest
     apache-airflow (installed via Docker)
+
+---
+
+## Data Visualization
+
+The pipeline includes visualization tasks using **matplotlib**:
+
+- Generates summary charts (e.g., most voted movies, genre distributions)
+- Visualizations are saved as PNG files in `/data/visualizations/`
+- Example: `analyze_visual.py` creates a horizontal bar chart of top movies by votes
+
+---
+
+## Testing
+
+Unit tests are provided for all main ETL tasks using **pytest**:
+
+- Test scripts are in `dags/tests/`
+- Each ETL function has a corresponding test that mocks dependencies and checks outputs
+- Example: `test_transform.py` verifies the transformation logic and output metrics
+- To run all tests:
+```
+pytest dags/tests/
+```
+
+---
 
 Author
 
